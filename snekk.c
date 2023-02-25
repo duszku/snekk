@@ -1,4 +1,5 @@
 #include "game.h"
+#include "ui.h"
 
 void         tup_free(void *);      /* frees a coordinate tuple */
 void         init(struct game *);   /* initializes game struct */

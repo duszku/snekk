@@ -1,0 +1,6 @@
+# Directories and files directly in the repo's root
+bin
+
+# Todos
+**/todo
+**/*.todo.md

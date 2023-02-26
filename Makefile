@@ -11,7 +11,7 @@ C_FLAGS_DEBUG=-Wall -Wextra -ansi -pedantic -ggdb -Og -DTARGET_DEBUG
 C_FLAGS_SANIT=-Wall -Wextra -ggdb -Og -fsanitize=address,undefined
 
 # Libraries
-LIBS_BASE=-lpthread -lfuncc $(pkg-config --libs ncurses)
+LIBS_BASE=-lpthread -lfuncc $(shell pkg-config --libs ncurses)
 
 LIBS_RELES=${LIBS_BASE}
 LIBS_DEBUG=${LIBS_BASE}

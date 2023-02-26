@@ -24,7 +24,7 @@ main(void)
                 ERROR("pthread_create");
 
         for (; !stopped;) {
-                sleep(1);
+                /* awful busy-waiting, just for now, things will happen here */
         }
 
         if (pthread_mutex_lock(&(game.mt_gover)) != 0)

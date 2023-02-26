@@ -1,5 +1,11 @@
 #include "ui.h"
 
+#define INSERT_CHAR(X, Y, C) do {   \
+        move((Y), (X));             \
+        delch();                    \
+        insch((C));                 \
+} while (0)
+
 static void         curses_setup(void);         /* abstracts boilerplate code */
 static void         draw_empty(struct game *);  /* draws empty map w/ borders */
 static void         draw_map(struct game *);    /* draws snake & apple */

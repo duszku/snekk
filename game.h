@@ -37,6 +37,7 @@ struct game {
 
         pthread_mutex_t mt_snake;
         pthread_mutex_t mt_apple;
+        pthread_mutex_t mt_gover;
 };
 
 #endif /* GAME_H */

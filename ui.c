@@ -17,8 +17,10 @@ ui_thread_r(void *v_game)
 {
         struct       game *game;
         sigset_t     mask;
+        int          over;
 
         game = (struct game *)v_game;
+        over = 0;
 
         sigemptyset(&mask);
         sigaddset(&mask, SIGINT);
@@ -26,7 +28,16 @@ ui_thread_r(void *v_game)
 
         curses_setup();
 
-        while (!game->gameover) {
+        while (!over) {
+                if (pthread_mutex_lock(&(game->mt_gover)) != 0)
+                        ERROR("pthread_mutex_lock");
+
+                if (game->gameover)
+                        over = 1;
+
+                if (pthread_mutex_unlock(&(game->mt_gover)) != 0)
+                        ERROR("pthread_mutex_unlock");
+
                 draw_empty(game);
                 draw_map(game);
                 sleep(1);

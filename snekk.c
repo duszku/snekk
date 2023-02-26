@@ -27,7 +27,14 @@ main(void)
                 sleep(1);
         }
 
+        if (pthread_mutex_lock(&(game.mt_gover)) != 0)
+                ERROR("pthread_mutex_lock");
+
         game.gameover = 1;
+
+        if (pthread_mutex_unlock(&(game.mt_gover)) != 0)
+                ERROR("pthread_mutex_unlock");
+
         pthread_join(ui_tid, NULL);
         cleanup(&game);
 
@@ -106,6 +113,8 @@ init(struct game *g)
                 ERROR("pthread_mutex_init");
         if (pthread_mutex_init(&(g->mt_snake), NULL) != 0)
                 ERROR("pthread_mutex_init");
+        if (pthread_mutex_init(&(g->mt_gover), NULL) != 0)
+                ERROR("pthread_mutex_init");
 }
 
 void
@@ -116,7 +125,8 @@ cleanup(struct game *g)
 
         if (pthread_mutex_destroy(&(g->mt_apple)) != 0)
                 ERROR("pthread_mutex_destroy");
-
         if (pthread_mutex_destroy(&(g->mt_snake)) != 0)
+                ERROR("pthread_mutex_destroy");
+        if (pthread_mutex_destroy(&(g->mt_gover)) != 0)
                 ERROR("pthread_mutex_destroy");
 }

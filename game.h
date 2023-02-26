@@ -6,10 +6,12 @@
 #define DEFAULT_WIDTH   80
 #define DEFAULT_HEIGHT  30
 
+#include <locale.h>
 #include <pthread.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <funcc/flist.h>
 #include <funcc/ftuple.h>

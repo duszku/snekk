@@ -8,9 +8,17 @@ void         cleanup(struct game *);    /* cleans the game struct */
 int
 main(void)
 {
-        struct   game game;
+        struct       game game;
+        pthread_t    ui_tid;
 
         init(&game);
+
+        if (pthread_create(&ui_tid, NULL, ui_thread_r, &game) != 0)
+                ERROR("pthread_create");
+
+        printf("Hello from main thread!\n");
+        pthread_join(ui_tid, NULL);
+        cleanup(&game);
 
         return EXIT_SUCCESS;
 }

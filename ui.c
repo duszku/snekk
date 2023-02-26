@@ -95,8 +95,14 @@ draw_map(struct game *g)
 
         flist_map(g->snake, map_helper, 0);
 
+        x = *((int *)ftuple_fst(flist_val_head(g->snake)));
+        y = *((int *)ftuple_snd(flist_val_head(g->snake)));
+
         if (pthread_mutex_unlock(&(g->mt_snake)) != 0)
                 ERROR("pthread_mutex_unlock");
+
+        if (x > 0 && y > 0)
+                INSERT_CHAR(x, y, 'O');
 
         refresh();
 }

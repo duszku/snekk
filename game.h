@@ -22,7 +22,7 @@
         exit(EXIT_FAILURE);                                 \
   } while (0)
 #else
-# define ERROR(X) ; 
+# define ERROR(X) {;}
 #endif
 
 struct game {

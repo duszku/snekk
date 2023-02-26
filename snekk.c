@@ -1,3 +1,5 @@
+#include <locale.h>
+
 #include "game.h"
 #include "ui.h"
 
@@ -11,6 +13,7 @@ main(void)
         struct       game game;
         pthread_t    ui_tid;
 
+        setlocale(LC_ALL, "");
         init(&game);
 
         if (pthread_create(&ui_tid, NULL, ui_thread_r, &game) != 0)

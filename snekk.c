@@ -19,7 +19,8 @@ main(void)
         if (pthread_create(&ui_tid, NULL, ui_thread_r, &game) != 0)
                 ERROR("pthread_create");
 
-        printf("Hello from main thread!\n");
+        sleep(2);
+        game.gameover = 1;
         pthread_join(ui_tid, NULL);
         cleanup(&game);
 

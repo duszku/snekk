@@ -1,8 +1,9 @@
 #include "game.h"
 #include "ui.h"
 
-void         tup_free(void *);      /* frees a coordinate tuple */
-void         init(struct game *);   /* initializes game struct */
+void         tup_free(void *);          /* frees a coordinate tuple */
+void         init(struct game *);       /* initializes game struct */
+void         cleanup(struct game *);    /* cleans the game struct */
 
 int
 main(void)
@@ -66,4 +67,9 @@ init(struct game *g)
 
         if (pthread_mutex_init(&(g->mt_snake), NULL) != 0)
                 ERROR("pthread_mutex_init");
+}
+
+void
+cleanup(struct game *g)
+{
 }

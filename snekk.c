@@ -37,8 +37,7 @@ init(struct game *g)
 #define NL(X) ((X) == NULL)
 
         struct   ftuple *sn_head;
-        int     *pos_x;
-        int     *pos_y;
+        int     *pos_x, *pos_y, *ap_x, *ap_y;
 
         /* basic game data */
         g->g_heig   = DEFAULT_HEIGHT;
@@ -49,7 +48,6 @@ init(struct game *g)
         /* setting up snake */
         if (NL(pos_x = malloc(sizeof(int))) || NL(pos_y = malloc(sizeof(int))))
                 ERROR("malloc");
-
         *pos_x = g->g_widt >> 1;
         *pos_y = g->g_heig >> 1;
 
@@ -60,6 +58,14 @@ init(struct game *g)
                 ERROR("flist_append");
 
         flist_set_cleanup(g->snake, tup_free);
+
+        /* setting up for apple position */
+        if (NL(ap_x = malloc(sizeof(int))) || NL(ap_y = malloc(sizeof(int))))
+                ERROR("malloc");
+        *ap_x = *ap_y = -1;
+
+        if (NL(g->apple = ftuple_create(2, ap_x, ap_y)))
+                ERROR("ftuple_create");
 
         /* preparing mutexes */
         if (pthread_mutex_init(&(g->mt_apple), NULL) != 0)

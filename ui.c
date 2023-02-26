@@ -72,4 +72,19 @@ draw_empty(struct game *g)
 void
 draw_map(struct game *g)
 {
+        int x, y;
+
+        if (pthread_mutex_lock(&(g->mt_apple)) != 0)
+                ERROR("pthread_mutex_lock");
+
+        x = *((int *)ftuple_fst(g->apple));
+        y = *((int *)ftuple_snd(g->apple));
+
+        if (pthread_mutex_unlock(&(g->mt_apple)) != 0)
+                ERROR("pthread_mutex_unlock");
+
+        if (x > 0 && y > 0)
+                INSERT_CHAR(x, y, '@');
+
+        refresh();
 }

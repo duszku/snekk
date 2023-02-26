@@ -15,9 +15,14 @@ static void         *map_helper(void *);
 void *
 ui_thread_r(void *v_game)
 {
-        struct   game *game;
+        struct       game *game;
+        sigset_t     mask;
 
         game = (struct game *)v_game;
+
+        sigemptyset(&mask);
+        sigaddset(&mask, SIGINT);
+        pthread_sigmask(SIG_BLOCK, &mask, NULL);
 
         curses_setup();
 
@@ -28,6 +33,7 @@ ui_thread_r(void *v_game)
         }
 
         endwin();
+        pthread_sigmask(SIG_UNBLOCK, &mask, NULL);
 
         return NULL;
 }

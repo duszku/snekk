@@ -1,11 +1,14 @@
-#include <locale.h>
-
 #include "game.h"
 #include "ui.h"
 
-void         tup_free(void *);          /* frees a coordinate tuple */
-void         init(struct game *);       /* initializes game struct */
-void         cleanup(struct game *);    /* cleans the game struct */
+volatile sig_atomic_t stopped = 0;
+
+void         tup_free(void *);                  /* frees a coordinate tuple */
+void         set_handler(void (*)(int), int);   /* sets signal handler */
+void         init(struct game *);               /* initializes game struct */
+void         cleanup(struct game *);            /* cleans the game struct */
+
+void sigint_hand(int ignore) { stopped = 1; }
 
 int
 main(void)
@@ -14,12 +17,16 @@ main(void)
         pthread_t    ui_tid;
 
         setlocale(LC_ALL, "");
+        set_handler(sigint_hand, SIGINT);
         init(&game);
 
         if (pthread_create(&ui_tid, NULL, ui_thread_r, &game) != 0)
                 ERROR("pthread_create");
 
-        sleep(2);
+        for (; !stopped;) {
+                sleep(1);
+        }
+
         game.gameover = 1;
         pthread_join(ui_tid, NULL);
         cleanup(&game);
@@ -41,6 +48,18 @@ tup_free(void *v_tup)
         free(tmp);
 
         ftuple_free(&tup);
+}
+
+void
+set_handler(void (*f)(int), int sig)
+{
+        struct   sigaction act;
+
+        memset(&act, 0x00, sizeof(struct sigaction));
+        act.sa_handler = f;
+
+        if (sigaction(sig, &act, NULL) == -1)
+                ERROR("sigaction");
 }
 
 void

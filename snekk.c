@@ -54,21 +54,24 @@ init(struct game *g)
         g->gameover = 0;
 
         /* setting up snake */
-        if (NL(pos_x = malloc(sizeof(int))) || NL(pos_y = malloc(sizeof(int))))
+        if (NL(pos_x = malloc(sizeof(int))))
+                ERROR("malloc");
+        if (NL(pos_y = malloc(sizeof(int))))
                 ERROR("malloc");
         *pos_x = g->g_widt >> 1;
         *pos_y = g->g_heig >> 1;
 
         if (NL(sn_head = ftuple_create(2, pos_x, pos_y)))
                 ERROR("ftuple_create");
-
         if (NL(g->snake = flist_append(NULL, sn_head, FLIST_CLEANABLE)))
                 ERROR("flist_append");
 
         flist_set_cleanup(g->snake, tup_free);
 
         /* setting up for apple position */
-        if (NL(ap_x = malloc(sizeof(int))) || NL(ap_y = malloc(sizeof(int))))
+        if (NL(ap_x = malloc(sizeof(int))))
+                ERROR("malloc");
+        if (NL(ap_y = malloc(sizeof(int))))
                 ERROR("malloc");
         *ap_x = *ap_y = -1;
 
@@ -78,7 +81,6 @@ init(struct game *g)
         /* preparing mutexes */
         if (pthread_mutex_init(&(g->mt_apple), NULL) != 0)
                 ERROR("pthread_mutex_init");
-
         if (pthread_mutex_init(&(g->mt_snake), NULL) != 0)
                 ERROR("pthread_mutex_init");
 }

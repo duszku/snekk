@@ -6,9 +6,11 @@
         insch((C));                 \
 } while (0)
 
-static void         curses_setup(void);         /* abstracts boilerplate code */
-static void         draw_empty(struct game *);  /* draws empty map w/ borders */
-static void         draw_map(struct game *);    /* draws snake & apple */
+static void          curses_setup(void);         /* abstracts boilerplate */
+static void          draw_empty(struct game *);  /* draws empty map & borders */
+static void          draw_map(struct game *);    /* draws snake & apple */
+
+static void         *map_helper(void *);
 
 void *
 ui_thread_r(void *v_game)
@@ -74,6 +76,7 @@ draw_map(struct game *g)
 {
         int x, y;
 
+        /* drawing an apple */
         if (pthread_mutex_lock(&(g->mt_apple)) != 0)
                 ERROR("pthread_mutex_lock");
 
@@ -86,5 +89,30 @@ draw_map(struct game *g)
         if (x > 0 && y > 0)
                 INSERT_CHAR(x, y, '@');
 
+        /* drawing snake */
+        if (pthread_mutex_lock(&(g->mt_snake)) != 0)
+                ERROR("pthread_mutex_lock");
+
+        flist_map(g->snake, map_helper, 0);
+
+        if (pthread_mutex_unlock(&(g->mt_snake)) != 0)
+                ERROR("pthread_mutex_unlock");
+
         refresh();
+}
+
+void *
+map_helper(void *v_tup)
+{
+        struct   ftuple *tup;
+        int      x, y;
+
+        tup = (struct ftuple *)v_tup;
+
+        x = *((int *)ftuple_fst(tup));
+        y = *((int *)ftuple_snd(tup));
+
+        INSERT_CHAR(x, y, 'o');
+
+        return v_tup;
 }

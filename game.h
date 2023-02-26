@@ -16,11 +16,10 @@
 
 /* report an error and terminate entire process group */
 #ifdef TARGET_DEBUG
-# define ERROR(X) do {
-        fprintf(stderr, "[%s:%d] ", __FILE__, __LINE__);
-        perror((X));
-        kill(0, SIGTERM);
-        exit(EXIT_FAILURE);
+# define ERROR(X) do {                                      \
+        fprintf(stderr, "[%s:%d] ", __FILE__, __LINE__);    \
+        perror((X));                                        \
+        exit(EXIT_FAILURE);                                 \
   } while (0)
 #else
 # define ERROR(X) ; 

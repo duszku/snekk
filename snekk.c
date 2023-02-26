@@ -88,4 +88,12 @@ init(struct game *g)
 void
 cleanup(struct game *g)
 {
+        flist_free(&(g->snake), 0);
+        tup_free(g->apple);
+
+        if (pthread_mutex_destroy(&(g->mt_apple)) != 0)
+                ERROR("pthread_mutex_destroy");
+
+        if (pthread_mutex_destroy(&(g->mt_snake)) != 0)
+                ERROR("pthread_mutex_destroy");
 }

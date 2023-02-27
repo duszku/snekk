@@ -34,9 +34,9 @@ spawn_apple(struct game *game)
         int      ap_x, ap_y;
 
         do {
-                ap_x = rand_r(&(game->rng_s)) % (game->g_widt - 1) + 1;
-                ap_y = rand_r(&(game->rng_s)) % (game->g_heig - 1) + 1;
-        } while (0); /* TODO: check for snake collision */
+                ap_x = rand_r(&(game->rng_s)) % (game->g_widt - 1);
+                ap_y = rand_r(&(game->rng_s)) % (game->g_heig - 1);
+        } while (apple_collides(game, ap_x, ap_y));
 
         if (pthread_mutex_lock(&(game->mt_apple)) != 0)
                 ERROR("pthread_mutex_lock");

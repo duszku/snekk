@@ -34,6 +34,7 @@ struct game {
         unsigned     g_widt;        /* width of the map */
         unsigned     g_heig;        /* height of the map */
         unsigned     points;        /* # points player has */
+        unsigned     rng_s;         /* rng seed */
         unsigned     gameover : 1;  /* has player lost? */
 
         pthread_mutex_t mt_snake;

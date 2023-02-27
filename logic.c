@@ -1,21 +1,19 @@
 #include "logic.h"
 
-static void      spawn_apple(struct game *, unsigned *);
+static void      spawn_apple(struct game *);
 
 void *
 logic_entry_point(void *v_game)
 {
         struct       game *game;
-        unsigned     seed;
         int          over;
 
         game = (struct game *)v_game;
-        seed = getpid();
         over = 0;
 
         while (!over) {
-                spawn_apple(game, &seed);
                 sleep(1);
+                spawn_apple(game);
 
                 if (pthread_mutex_lock(&(game->mt_gover)) != 0)
                         ERROR("pthread_mutex_lock");
@@ -31,16 +29,13 @@ logic_entry_point(void *v_game)
 }
 
 void
-spawn_apple(struct game *game, unsigned *seed_p)
+spawn_apple(struct game *game)
 {
         int      ap_x, ap_y;
 
         do {
-                do ap_x = rand_r(seed_p);
-                while (ap_x < 1 || (unsigned)ap_x > game->g_widt - 1);
-
-                do ap_y = rand_r(seed_p);
-                while (ap_y < 1 || (unsigned)ap_y > game->g_heig - 1);
+                ap_x = rand_r(&(game->rng_s)) % (game->g_widt - 1) + 1;
+                ap_y = rand_r(&(game->rng_s)) % (game->g_heig - 1) + 1;
         } while (0); /* TODO: check for snake collision */
 
         if (pthread_mutex_lock(&(game->mt_apple)) != 0)

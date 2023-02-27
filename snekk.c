@@ -73,9 +73,12 @@ init(struct game *g)
         struct   ftuple *sn_head;
         int     *pos_x, *pos_y, *ap_x, *ap_y;
 
+        srand(time(NULL));
+
         /* basic game data */
         g->g_heig   = DEFAULT_HEIGHT;
         g->g_widt   = DEFAULT_WIDTH;
+        g->rng_s    = rand();
         g->points   = 0;
         g->gameover = 0;
 

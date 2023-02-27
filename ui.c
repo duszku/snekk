@@ -29,6 +29,10 @@ ui_entry_point(void *v_game)
         curses_setup();
 
         while (!over) {
+                draw_empty(game);
+                draw_map(game);
+                sleep(1);
+
                 if (pthread_mutex_lock(&(game->mt_gover)) != 0)
                         ERROR("pthread_mutex_lock");
 
@@ -37,10 +41,6 @@ ui_entry_point(void *v_game)
 
                 if (pthread_mutex_unlock(&(game->mt_gover)) != 0)
                         ERROR("pthread_mutex_unlock");
-
-                draw_empty(game);
-                draw_map(game);
-                sleep(1);
         }
 
         endwin();

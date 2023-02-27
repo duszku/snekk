@@ -126,3 +126,20 @@ cleanup(struct game *g)
         if (pthread_mutex_destroy(&(g->mt_gover)) != 0)
                 ERROR("pthread_mutex_destroy");
 }
+
+void
+wait_till_over(struct game *g)
+{
+        sigset_t     mask;
+
+        sigemptyset(&mask);
+        sigsuspend(&mask);
+
+        if (pthread_mutex_lock(&(g->mt_gover)) != 0)
+                ERROR("pthread_mutex_lock");
+
+        g->gameover = 1;
+
+        if (pthread_mutex_unlock(&(g->mt_gover)) != 0)
+                ERROR("pthread_mutex_unlock");
+}

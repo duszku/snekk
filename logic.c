@@ -35,6 +35,10 @@ spawn_apple(struct game *game)
 {
         int      ap_x, ap_y;
 
+        /*
+         * TODO: (after movement is implemented) dont respawn apples if previous
+         * one was not collected yet
+         */
         do {
                 ap_x = rand_r(&(game->rng_s)) % (game->g_widt - 1);
                 ap_y = rand_r(&(game->rng_s)) % (game->g_heig - 1);

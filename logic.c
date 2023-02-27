@@ -1,6 +1,8 @@
 #include "logic.h"
 
+static int       tup_cmp(const void *, const void *);
 static void      spawn_apple(struct game *);
+static int       apple_collides(struct game *, int, int);
 
 void *
 logic_entry_point(void *v_game)
@@ -46,4 +48,46 @@ spawn_apple(struct game *game)
 
         if (pthread_mutex_unlock(&(game->mt_apple)) != 0)
                 ERROR("pthread_mutex_lock");
+}
+
+int
+apple_collides(struct game *game, int x, int y)
+{
+        struct   ftuple *tup;
+        int      ret;
+
+        if ((tup = ftuple_create(2, &x, &y)) == NULL)
+                ERROR("ftuple_create");
+
+        if (pthread_mutex_lock(&(game->mt_snake)) != 0)
+                ERROR("pthread_mutex_lock");
+
+        ret = flist_elem(game->snake, tup_cmp, tup);
+
+        if (pthread_mutex_unlock(&(game->mt_snake)) != 0)
+                ERROR("pthread_mutex_unlock");
+
+        ftuple_free(&tup);
+
+        return ret;
+}
+
+int
+tup_cmp(const void *v_a, const void *v_b)
+{
+#define DEREF_INT_OF(X) (*((int *)(X)))
+
+        struct   ftuple *a, *b;
+        int      a_x, a_y, b_x, b_y;
+
+        a = (struct ftuple *)v_a;
+        b = (struct ftuple *)v_b;
+
+        a_x = DEREF_INT_OF(ftuple_fst(a));
+        a_y = DEREF_INT_OF(ftuple_snd(a));
+
+        b_x = DEREF_INT_OF(ftuple_fst(b));
+        b_y = DEREF_INT_OF(ftuple_snd(b));
+
+        return a_x == b_x && a_y == b_y ? 0 : 1;
 }

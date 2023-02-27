@@ -6,6 +6,6 @@
 #include <curses.h>
 #include <unistd.h>
 
-void        *ui_thread_r(void *);
+void        *ui_entry_point(void *);
 
 #endif /* UI_H */

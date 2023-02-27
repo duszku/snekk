@@ -20,7 +20,7 @@ main(void)
         set_handler(sigint_hand, SIGINT);
         init(&game);
 
-        if (pthread_create(&ui_tid, NULL, ui_thread_r, &game) != 0)
+        if (pthread_create(&ui_tid, NULL, ui_entry_point, &game) != 0)
                 ERROR("pthread_create");
 
         for (; !stopped;) {

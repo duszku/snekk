@@ -13,7 +13,7 @@ static void          draw_map(struct game *);    /* draws snake & apple */
 static void         *map_helper(void *);
 
 void *
-ui_thread_r(void *v_game)
+ui_entry_point(void *v_game)
 {
         struct       game *game;
         sigset_t     mask;

@@ -1,7 +1,7 @@
 CC=gcc
 TARGET=DEBUG
 
-SRC=snekk.c ui.c
+SRC=snekk.c ui.c logic.c
 OBJ=${SRC:.c=.o}
 DIR=bin
 

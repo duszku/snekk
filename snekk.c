@@ -1,4 +1,5 @@
 #include "game.h"
+#include "logic.h"
 #include "ui.h"
 
 volatile sig_atomic_t stopped = 0;
@@ -7,6 +8,7 @@ void         tup_free(void *);                  /* frees a coordinate tuple */
 void         set_handler(void (*)(int), int);   /* sets signal handler */
 void         init(struct game *);               /* initializes game struct */
 void         cleanup(struct game *);            /* cleans the game struct */
+void         wait_till_over(struct game *);     /* waits for SIGINT */
 
 void sigint_hand(int ignore) { stopped = 1; }
 
@@ -14,7 +16,7 @@ int
 main(void)
 {
         struct       game game;
-        pthread_t    ui_tid;
+        pthread_t    ui_tid, lg_tid;
 
         setlocale(LC_ALL, "");
         set_handler(sigint_hand, SIGINT);
@@ -23,19 +25,13 @@ main(void)
         if (pthread_create(&ui_tid, NULL, ui_entry_point, &game) != 0)
                 ERROR("pthread_create");
 
-        for (; !stopped;) {
-                /* awful busy-waiting, just for now, things will happen here */
-        }
+        if (pthread_create(&lg_tid, NULL, logic_entry_point, &game) != 0)
+                ERROR("pthread_create");
 
-        if (pthread_mutex_lock(&(game.mt_gover)) != 0)
-                ERROR("pthread_mutex_lock");
-
-        game.gameover = 1;
-
-        if (pthread_mutex_unlock(&(game.mt_gover)) != 0)
-                ERROR("pthread_mutex_unlock");
+        wait_till_over(&game);
 
         pthread_join(ui_tid, NULL);
+        pthread_join(lg_tid, NULL);
         cleanup(&game);
 
         return EXIT_SUCCESS;

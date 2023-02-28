@@ -29,6 +29,9 @@
 #endif
 
 struct game {
+        /* player movement direction */
+        enum { STOP, U, D, L, R } dir;
+
         struct       flist *snake;  /* list of coords of snake segments */
         struct       ftuple *apple; /* coordinates of current apple position */
         unsigned     g_widt;        /* width of the map */

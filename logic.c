@@ -1,8 +1,9 @@
 #include "logic.h"
 
 static int       tup_cmp(const void *, const void *);
-static void      spawn_apple(struct game *);
 static int       apple_collides(struct game *, int, int);
+static void      spawn_apple(struct game *);
+static void      move_snake(struct game *);
 
 void *
 logic_entry_point(void *v_game)

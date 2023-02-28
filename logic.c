@@ -131,7 +131,8 @@ move_snake(struct game *game)
                 ERROR("pthread_mutex_lock");
 
         /* move all segments of the snake */
-        movement_prev = NULL;
+        DEREF_INT_OF(ftuple_fst(movement_prev)) = -1;
+        DEREF_INT_OF(ftuple_snd(movement_prev)) = -1;
         flist_map(game->snake, pull_snake, 0);
 
         /* move head of the snake */
@@ -161,3 +162,27 @@ init_global(void)
         DEREF_INT_OF(ftuple_snd(movement_prev)) = -1;
 }
 
+void *
+pull_snake(void *v_tup)
+{
+#define DEREF_INT_OF(X) (*((int *)(X)))
+
+        struct   ftuple *tup;
+        int      tmp_x, tmp_y;
+
+        tup   = (struct ftuple *)v_tup;
+        tmp_x = DEREF_INT_OF(ftuple_fst(movement_prev));
+        tmp_y = DEREF_INT_OF(ftuple_snd(movement_prev));
+
+        /* save coords for next iteration */
+        DEREF_INT_OF(ftuple_fst(movement_prev)) = DEREF_INT_OF(ftuple_fst(tup));
+        DEREF_INT_OF(ftuple_snd(movement_prev)) = DEREF_INT_OF(ftuple_snd(tup));
+
+        /* assign new coords */
+        if (tmp_x != -1 && tmp_y != -1) {
+                DEREF_INT_OF(ftuple_fst(tup)) = tmp_x;
+                DEREF_INT_OF(ftuple_snd(tup)) = tmp_y;
+        }
+
+        return v_tup;
+}

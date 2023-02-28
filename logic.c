@@ -11,6 +11,7 @@ static void      move_snake(struct game *);
 static void      spawn_apple(struct game *);
 
 /* helper subroutines */
+static void      init_global(void);
 static int       apple_collides(struct game *, int, int);
 static int       tup_cmp(const void *, const void *);
 static void     *pull_snake(void *);
@@ -25,6 +26,7 @@ logic_entry_point(void *v_game)
         struct       game *game;
         int          over;
 
+        init_global();
         game = (struct game *)v_game;
         over = 0;
 
@@ -42,6 +44,10 @@ logic_entry_point(void *v_game)
                 if (pthread_mutex_unlock(&(game->mt_gover)) != 0)
                         ERROR("pthread_mutex_unlock");
         }
+
+        free(ftuple_fst(movement_prev));
+        free(ftuple_snd(movement_prev));
+        ftuple_free(&movement_prev);
 
         return NULL;
 }
@@ -134,3 +140,24 @@ move_snake(struct game *game)
         if (pthread_mutex_unlock(&(game->mt_snake)) != 0)
                 ERROR("pthread_mutex_unlock");
 }
+
+void
+init_global(void)
+{
+#define DEREF_INT_OF(X) (*((int *)(X)))
+
+        int *x, *y;
+
+        if ((x = malloc(sizeof(int))) == NULL)
+                ERROR("malloc");
+
+        if ((y = malloc(sizeof(int))) == NULL)
+                ERROR("malloc");
+
+        if ((movement_prev = ftuple_create(2, x, y)) == NULL)
+                ERROR("ftuple_create");
+
+        DEREF_INT_OF(ftuple_fst(movement_prev)) = -1;
+        DEREF_INT_OF(ftuple_snd(movement_prev)) = -1;
+}
+

@@ -1,5 +1,7 @@
 #include "logic.h"
 
+#define DEREF_INT_OF(X) (*((int *)(X)))
+
 /*
  * previous snake segment, used for movement in pull_snake(). it is stored as
  * global state because flist_map() exposes list for mapping only with
@@ -69,8 +71,8 @@ spawn_apple(struct game *game)
         if (pthread_mutex_lock(&(game->mt_apple)) != 0)
                 ERROR("pthread_mutex_lock");
 
-        *((int *)ftuple_fst(game->apple)) = ap_x;
-        *((int *)ftuple_snd(game->apple)) = ap_y;
+        DEREF_INT_OF(ftuple_fst(game->apple)) = ap_x;
+        DEREF_INT_OF(ftuple_snd(game->apple)) = ap_y;
 
         if (pthread_mutex_unlock(&(game->mt_apple)) != 0)
                 ERROR("pthread_mutex_lock");
@@ -101,8 +103,6 @@ apple_collides(struct game *game, int x, int y)
 int
 tup_cmp(const void *v_a, const void *v_b)
 {
-#define DEREF_INT_OF(X) (*((int *)(X)))
-
         struct   ftuple *a, *b;
         int      a_x, a_y, b_x, b_y;
 
@@ -145,8 +145,6 @@ move_snake(struct game *game)
 void
 init_global(void)
 {
-#define DEREF_INT_OF(X) (*((int *)(X)))
-
         int *x, *y;
 
         if ((x = malloc(sizeof(int))) == NULL)
@@ -165,7 +163,6 @@ init_global(void)
 void *
 pull_snake(void *v_tup)
 {
-#define DEREF_INT_OF(X) (*((int *)(X)))
 
         struct   ftuple *tup;
         int      tmp_x, tmp_y;

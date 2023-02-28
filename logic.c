@@ -30,6 +30,7 @@ logic_entry_point(void *v_game)
 
         while (!over) {
                 sleep(1);
+                move_snake(game);
                 spawn_apple(game);
 
                 if (pthread_mutex_lock(&(game->mt_gover)) != 0)
@@ -109,4 +110,27 @@ tup_cmp(const void *v_a, const void *v_b)
         b_y = DEREF_INT_OF(ftuple_snd(b));
 
         return a_x == b_x && a_y == b_y ? 0 : 1;
+}
+
+/* TODO: test it */
+void
+move_snake(struct game *game)
+{
+        void *(*movs[])(void *) = { mov_u, mov_d, mov_l, mov_r };
+
+        if (game->dir == STOP)
+                return;
+
+        if (pthread_mutex_lock(&(game->mt_snake)) != 0)
+                ERROR("pthread_mutex_lock");
+
+        /* move all segments of the snake */
+        movement_prev = NULL;
+        flist_map(game->snake, pull_snake, 0);
+
+        /* move head of the snake */
+        movs[game->dir - 1](flist_val_head(game->snake));
+
+        if (pthread_mutex_unlock(&(game->mt_snake)) != 0)
+                ERROR("pthread_mutex_unlock");
 }

@@ -183,3 +183,47 @@ pull_snake(void *v_tup)
 
         return v_tup;
 }
+
+void *
+mov_u(void *v_tup)
+{
+        struct   ftuple *tup;
+
+        tup = (struct ftuple *)v_tup;
+        DEREF_INT_OF(ftuple_snd(tup))--;
+
+        return v_tup;
+}
+
+void *
+mov_d(void *v_tup)
+{
+        struct   ftuple *tup;
+
+        tup = (struct ftuple *)v_tup;
+        DEREF_INT_OF(ftuple_snd(tup))++;
+
+        return v_tup;
+}
+
+void *
+mov_l(void *v_tup)
+{
+        struct   ftuple *tup;
+
+        tup = (struct ftuple *)v_tup;
+        DEREF_INT_OF(ftuple_fst(tup))--;
+
+        return v_tup;
+}
+
+void *
+mov_r(void *v_tup)
+{
+        struct   ftuple *tup;
+
+        tup = (struct ftuple *)v_tup;
+        DEREF_INT_OF(ftuple_fst(tup))++;
+
+        return v_tup;
+}

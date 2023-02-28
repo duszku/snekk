@@ -8,6 +8,16 @@
 struct ftuple   *movement_prev;
 
 static void      move_snake(struct game *);
+static void      spawn_apple(struct game *);
+
+/* helper subroutines */
+static int       apple_collides(struct game *, int, int);
+static int       tup_cmp(const void *, const void *);
+static void     *pull_snake(void *);
+static void     *mov_u(void *);
+static void     *mov_d(void *);
+static void     *mov_l(void *);
+static void     *mov_r(void *);
 
 void *
 logic_entry_point(void *v_game)

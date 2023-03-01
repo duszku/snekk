@@ -6,7 +6,7 @@
  * previous snake segment, used for movement in pull_snake(). it is stored as
  * global state because flist_map() exposes list for mapping only with
  * single-argument functions.
- * */
+ */
 struct ftuple   *movement_prev;
 
 static void      move_snake(struct game *);

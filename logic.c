@@ -119,7 +119,6 @@ tup_cmp(const void *v_a, const void *v_b)
         return a_x == b_x && a_y == b_y ? 0 : 1;
 }
 
-/* TODO: test it */
 void
 move_snake(struct game *game)
 {

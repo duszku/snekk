@@ -11,6 +11,7 @@ struct ftuple   *movement_prev;
 
 static void      move_snake(struct game *);
 static void      spawn_apple(struct game *);
+static void      grow_snake(struct game *);
 
 /* helper subroutines */
 static void      init_global(void);
@@ -182,6 +183,31 @@ pull_snake(void *v_tup)
         }
 
         return v_tup;
+}
+
+void
+grow_snake(struct game *game)
+{
+        struct   ftuple *new;
+        int     *x, *y;
+
+        if ((x = malloc(sizeof(int))) == NULL)
+                ERROR("malloc");
+
+        if ((y = malloc(sizeof(int))) == NULL)
+                ERROR("malloc");
+
+        if (pthread_mutex_lock(&(game->mt_snake)) != 0)
+                ERROR("pthread_mutex_lock");
+
+        *x  = DEREF_INT_OF(ftuple_fst(flist_val_head(game->snake)));
+        *y  = DEREF_INT_OF(ftuple_snd(flist_val_head(game->snake)));
+        new = ftuple_create(2, x, y);
+
+        game->snake = flist_prepend(game->snake, new, FLIST_CLEANABLE);
+
+        if (pthread_mutex_unlock(&(game->mt_snake)) != 0)
+                ERROR("pthread_mutex_unlock");
 }
 
 void *

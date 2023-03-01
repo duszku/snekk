@@ -65,8 +65,8 @@ spawn_apple(struct game *game)
          * one was not collected yet
          */
         do {
-                ap_x = rand_r(&(game->rng_s)) % (game->g_widt - 1);
-                ap_y = rand_r(&(game->rng_s)) % (game->g_heig - 1);
+                ap_x = rand_r(&(game->rng_s)) % (game->g_widt - 2) + 1;
+                ap_y = rand_r(&(game->rng_s)) % (game->g_heig - 2) + 1;
         } while (apple_collides(game, ap_x, ap_y));
 
         if (pthread_mutex_lock(&(game->mt_apple)) != 0)

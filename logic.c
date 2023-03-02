@@ -67,10 +67,6 @@ spawn_apple(struct game *game)
 {
         int      ap_x, ap_y;
 
-        /*
-         * TODO: (after movement is implemented) dont respawn apples if previous
-         * one was not collected yet
-         */
         do {
                 ap_x = rand_r(&(game->rng_s)) % (game->g_widt - 2) + 1;
                 ap_y = rand_r(&(game->rng_s)) % (game->g_heig - 2) + 1;
@@ -79,8 +75,11 @@ spawn_apple(struct game *game)
         if (pthread_mutex_lock(&(game->mt_apple)) != 0)
                 ERROR("pthread_mutex_lock");
 
-        DEREF_INT_OF(ftuple_fst(game->apple)) = ap_x;
-        DEREF_INT_OF(ftuple_snd(game->apple)) = ap_y;
+        if (DEREF_INT_OF(ftuple_fst(game->apple)) == -1
+            && DEREF_INT_OF(ftuple_snd(game->apple)) == -1) {
+                DEREF_INT_OF(ftuple_fst(game->apple)) = ap_x;
+                DEREF_INT_OF(ftuple_snd(game->apple)) = ap_y;
+        }
 
         if (pthread_mutex_unlock(&(game->mt_apple)) != 0)
                 ERROR("pthread_mutex_lock");

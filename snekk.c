@@ -2,15 +2,11 @@
 #include "logic.h"
 #include "ui.h"
 
-volatile sig_atomic_t stopped = 0;
-
 void         tup_free(void *);                  /* frees a coordinate tuple */
 void         set_handler(void (*)(int), int);   /* sets signal handler */
 void         init(struct game *);               /* initializes game struct */
 void         cleanup(struct game *);            /* cleans the game struct */
 void         wait_till_over(struct game *);     /* waits for SIGINT */
-
-void sigint_hand(int ignore) { stopped = 1; }
 
 int
 main(void)
@@ -19,7 +15,6 @@ main(void)
         pthread_t    ui_tid, lg_tid;
 
         setlocale(LC_ALL, "");
-        set_handler(sigint_hand, SIGINT);
         init(&game);
 
         if (pthread_create(&ui_tid, NULL, ui_entry_point, &game) != 0)
@@ -27,8 +22,6 @@ main(void)
 
         if (pthread_create(&lg_tid, NULL, logic_entry_point, &game) != 0)
                 ERROR("pthread_create");
-
-        wait_till_over(&game);
 
         pthread_join(ui_tid, NULL);
         pthread_join(lg_tid, NULL);
@@ -51,18 +44,6 @@ tup_free(void *v_tup)
         free(tmp);
 
         ftuple_free(&tup);
-}
-
-void
-set_handler(void (*f)(int), int sig)
-{
-        struct   sigaction act;
-
-        memset(&act, 0x00, sizeof(struct sigaction));
-        act.sa_handler = f;
-
-        if (sigaction(sig, &act, NULL) == -1)
-                ERROR("sigaction");
 }
 
 void
@@ -132,21 +113,4 @@ cleanup(struct game *g)
                 ERROR("pthread_mutex_destroy");
         if (pthread_mutex_destroy(&(g->mt_dir)) != 0)
                 ERROR("pthread_mutex_destroy");
-}
-
-void
-wait_till_over(struct game *g)
-{
-        sigset_t     mask;
-
-        sigemptyset(&mask);
-        sigsuspend(&mask);
-
-        if (pthread_mutex_lock(&(g->mt_gover)) != 0)
-                ERROR("pthread_mutex_lock");
-
-        g->gameover = 1;
-
-        if (pthread_mutex_unlock(&(g->mt_gover)) != 0)
-                ERROR("pthread_mutex_unlock");
 }

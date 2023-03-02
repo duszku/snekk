@@ -19,18 +19,12 @@ void *
 ui_entry_point(void *v_game)
 {
         struct       game *game;
-        sigset_t     mask;
         int          over;
 
         game = (struct game *)v_game;
         over = 0;
 
-        sigemptyset(&mask);
-        sigaddset(&mask, SIGINT);
-        pthread_sigmask(SIG_BLOCK, &mask, NULL);
-
         curses_setup();
-
         while (!over) {
                 pop_input(game);
                 draw_empty(game);
@@ -48,7 +42,6 @@ ui_entry_point(void *v_game)
         }
 
         endwin();
-        pthread_sigmask(SIG_UNBLOCK, &mask, NULL);
 
         return NULL;
 }

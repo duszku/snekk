@@ -41,13 +41,12 @@ logic_entry_point(void *v_game)
         if (pthread_mutex_unlock(&(game->mt_dir)) != 0)
                 ERROR("pthread_mutex_unlock");
 
+        spawn_apple(game);
         while (!over) {
                 sleep(1);
                 move_snake(game);
                 if (check_collisions(game))
                         break;
-
-                spawn_apple(game);
 
                 if (pthread_mutex_lock(&(game->mt_gover)) != 0)
                         ERROR("pthread_mutex_lock");
@@ -69,21 +68,18 @@ logic_entry_point(void *v_game)
 void
 spawn_apple(struct game *game)
 {
-        int      ap_x, ap_y;
+        int      new_x, new_y;
 
         do {
-                ap_x = rand_r(&(game->rng_s)) % (game->g_widt - 2) + 1;
-                ap_y = rand_r(&(game->rng_s)) % (game->g_heig - 2) + 1;
-        } while (apple_collides(game, ap_x, ap_y));
+                new_x = rand_r(&(game->rng_s)) % (game->g_widt - 2) + 1;
+                new_y = rand_r(&(game->rng_s)) % (game->g_heig - 2) + 1;
+        } while (apple_collides(game, new_x, new_y));
 
         if (pthread_mutex_lock(&(game->mt_apple)) != 0)
                 ERROR("pthread_mutex_lock");
 
-        if (DEREF_INT_OF(ftuple_fst(game->apple)) == -1
-            && DEREF_INT_OF(ftuple_snd(game->apple)) == -1) {
-                DEREF_INT_OF(ftuple_fst(game->apple)) = ap_x;
-                DEREF_INT_OF(ftuple_snd(game->apple)) = ap_y;
-        }
+        DEREF_INT_OF(ftuple_fst(game->apple)) = new_x;
+        DEREF_INT_OF(ftuple_snd(game->apple)) = new_y;
 
         if (pthread_mutex_unlock(&(game->mt_apple)) != 0)
                 ERROR("pthread_mutex_lock");
@@ -273,6 +269,7 @@ mov_r(void *v_tup)
 int
 check_collisions(struct game *game)
 {
+        int      ap_x, ap_y;
         unsigned x, y;
 
         if (pthread_mutex_lock(&(game->mt_snake)) != 0)
@@ -292,6 +289,13 @@ check_collisions(struct game *game)
                         ERROR("pthread_mutex_unlock");
 
                 return 1;
+        }
+
+        get_ap_coords(game, &ap_x, &ap_y);
+        if (apple_collides(game, ap_x, ap_y)) {
+                game->points++;
+                grow_snake(game);
+                spawn_apple(game);
         }
 
         return 0;

@@ -9,6 +9,9 @@
 static void          curses_setup(void);         /* abstracts boilerplate */
 static void          draw_empty(struct game *);  /* draws empty map & borders */
 static void          draw_map(struct game *);    /* draws snake & apple */
+static void          pop_input(struct game *);   /* reads input queue and sets
+                                                    parameters in the game
+                                                    struct accordingly */
 
 static void         *map_helper(void *);
 
@@ -29,6 +32,7 @@ ui_entry_point(void *v_game)
         curses_setup();
 
         while (!over) {
+                pop_input(game);
                 draw_empty(game);
                 draw_map(game);
                 sleep(1);
@@ -139,4 +143,51 @@ map_helper(void *v_tup)
         INSERT_CHAR(x, y, 'o');
 
         return v_tup;
+}
+
+void
+pop_input(struct game *g)
+{
+        if (pthread_mutex_lock(&(g->mt_dir)) != 0)
+                ERROR("pthread_mutex_lock");
+
+        switch (getch()) {
+        case KEY_DOWN:
+                /* FALLTHROUGH */
+        case 's':
+                g->dir = D;
+                break;
+        case KEY_UP:
+                /* FALLTHROUGH */
+        case 'w':
+                g->dir = U;
+                break;
+        case KEY_LEFT:
+                /* FALLTHROUGH */
+        case 'a':
+                g->dir = L;
+                break;
+        case KEY_RIGHT:
+                /* FALLTHROUGH */
+        case 'd':
+                g->dir = R;
+                break;
+        case 'p':
+                g->dir = STOP;
+                break;
+        case 'x':
+                if (pthread_mutex_lock(&(g->mt_gover)) != 0)
+                        ERROR("pthread_mutex_lock");
+
+                g->gameover = 1;
+
+                if (pthread_mutex_unlock(&(g->mt_gover)) != 0)
+                        ERROR("pthread_mutex_unlock");
+                break;
+        default:
+                break;
+        }
+
+        if (pthread_mutex_unlock(&(g->mt_dir)) != 0)
+                ERROR("pthread_mutex_unlock");
 }

@@ -55,6 +55,7 @@ curses_setup(void)
         initscr();
         cbreak();
         noecho();
+        nodelay(stdscr, 1);
         clear();
         refresh();
 }

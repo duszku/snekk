@@ -23,6 +23,7 @@ static void     *mov_u(void *);
 static void     *mov_d(void *);
 static void     *mov_l(void *);
 static void     *mov_r(void *);
+static void      get_ap_coords(struct game *, int *, int *);
 
 void *
 logic_entry_point(void *v_game)
@@ -294,4 +295,17 @@ check_collisions(struct game *game)
         }
 
         return 0;
+}
+
+void
+get_ap_coords(struct game *game, int *xp, int *yp)
+{
+        if (pthread_mutex_lock(&(game->mt_apple)) != 0)
+                ERROR("pthread_mutex_lock");
+
+        *xp = DEREF_INT_OF(ftuple_fst(game->apple));
+        *yp = DEREF_INT_OF(ftuple_snd(game->apple));
+
+        if (pthread_mutex_unlock(&(game->mt_apple)) != 0)
+                ERROR("pthread_mutex_unlock");
 }

@@ -12,6 +12,7 @@ struct ftuple   *movement_prev;
 static void      move_snake(struct game *);
 static void      spawn_apple(struct game *);
 static void      grow_snake(struct game *);
+static int       check_collisions(struct game *);
 
 /* helper subroutines */
 static void      init_global(void);
@@ -42,7 +43,9 @@ logic_entry_point(void *v_game)
         while (!over) {
                 sleep(1);
                 move_snake(game);
-                grow_snake(game);
+                if (check_collisions(game))
+                        break;
+
                 spawn_apple(game);
 
                 if (pthread_mutex_lock(&(game->mt_gover)) != 0)
@@ -264,4 +267,31 @@ mov_r(void *v_tup)
         DEREF_INT_OF(ftuple_fst(tup))++;
 
         return v_tup;
+}
+
+int
+check_collisions(struct game *game)
+{
+        unsigned x, y;
+
+        if (pthread_mutex_lock(&(game->mt_snake)) != 0)
+                ERROR("pthread_mutex_lock");
+
+        x = DEREF_INT_OF(ftuple_fst(flist_val_head(game->snake)));
+        y = DEREF_INT_OF(ftuple_snd(flist_val_head(game->snake)));
+
+        if (pthread_mutex_unlock(&(game->mt_snake)) != 0)
+                ERROR("pthread_mutex_unlock");
+
+        if (x <= 0 || x >= game->g_widt - 1|| y <= 0 || y >= game->g_heig - 1) {
+                if (pthread_mutex_lock(&(game->mt_gover)) != 0)
+                        ERROR("pthread_mutex_lock");
+                game->gameover = 1;
+                if (pthread_mutex_unlock(&(game->mt_gover)) != 0)
+                        ERROR("pthread_mutex_unlock");
+
+                return 1;
+        }
+
+        return 0;
 }

@@ -269,11 +269,20 @@ mov_r(void *v_tup)
 int
 check_collisions(struct game *game)
 {
-        int      ap_x, ap_y;
+        struct   flist *cpy;
+        int      ap_x, ap_y, over;
         unsigned x, y;
+
+        over = 0;
 
         if (pthread_mutex_lock(&(game->mt_snake)) != 0)
                 ERROR("pthread_mutex_lock");
+
+        cpy = flist_copy(game->snake, NULL);
+        flist_tail(&cpy, 0);
+
+        if (flist_elem(cpy, tup_cmp, flist_val_head(game->snake)))
+                over = 1;
 
         x = DEREF_INT_OF(ftuple_fst(flist_val_head(game->snake)));
         y = DEREF_INT_OF(ftuple_snd(flist_val_head(game->snake)));
@@ -281,7 +290,12 @@ check_collisions(struct game *game)
         if (pthread_mutex_unlock(&(game->mt_snake)) != 0)
                 ERROR("pthread_mutex_unlock");
 
-        if (x <= 0 || x >= game->g_widt - 1|| y <= 0 || y >= game->g_heig - 1) {
+        if (x <= 0 || x >= game->g_widt - 1|| y <= 0 || y >= game->g_heig - 1)
+                over = 1;
+
+        if (over) {
+                flist_free(&cpy, 0);
+
                 if (pthread_mutex_lock(&(game->mt_gover)) != 0)
                         ERROR("pthread_mutex_lock");
                 game->gameover = 1;

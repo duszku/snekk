@@ -114,6 +114,8 @@ init(struct game *g)
                 ERROR("pthread_mutex_init");
         if (pthread_mutex_init(&(g->mt_gover), NULL) != 0)
                 ERROR("pthread_mutex_init");
+        if (pthread_mutex_init(&(g->mt_dir), NULL) != 0)
+                ERROR("pthread_mutex_init");
 }
 
 void
@@ -127,6 +129,8 @@ cleanup(struct game *g)
         if (pthread_mutex_destroy(&(g->mt_snake)) != 0)
                 ERROR("pthread_mutex_destroy");
         if (pthread_mutex_destroy(&(g->mt_gover)) != 0)
+                ERROR("pthread_mutex_destroy");
+        if (pthread_mutex_destroy(&(g->mt_dir)) != 0)
                 ERROR("pthread_mutex_destroy");
 }
 

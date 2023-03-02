@@ -32,7 +32,12 @@ logic_entry_point(void *v_game)
         init_global();
         game = (struct game *)v_game;
         over = 0;
+
+        if (pthread_mutex_lock(&(game->mt_dir)) != 0)
+                ERROR("pthread_mutex_lock");
         game->dir = R;
+        if (pthread_mutex_unlock(&(game->mt_dir)) != 0)
+                ERROR("pthread_mutex_unlock");
 
         while (!over) {
                 sleep(1);
@@ -124,9 +129,16 @@ tup_cmp(const void *v_a, const void *v_b)
 void
 move_snake(struct game *game)
 {
-        void *(*movs[])(void *) = { NULL, mov_u, mov_d, mov_l, mov_r };
+        void    *(*movs[])(void *) = { NULL, mov_u, mov_d, mov_l, mov_r };
+        int      dir;
 
-        if (game->dir == STOP)
+        if (pthread_mutex_lock(&(game->mt_dir)) != 0)
+                ERROR("pthread_mutex_lock");
+        dir = game->dir;
+        if (pthread_mutex_unlock(&(game->mt_dir)) != 0)
+                ERROR("pthread_mutex_unlock");
+
+        if (dir == STOP)
                 return;
 
         if (pthread_mutex_lock(&(game->mt_snake)) != 0)
@@ -138,7 +150,7 @@ move_snake(struct game *game)
         flist_map(game->snake, pull_snake, 0);
 
         /* move head of the snake */
-        movs[game->dir](flist_val_head(game->snake));
+        movs[dir](flist_val_head(game->snake));
 
         if (pthread_mutex_unlock(&(game->mt_snake)) != 0)
                 ERROR("pthread_mutex_unlock");

@@ -30,7 +30,7 @@
 
 struct game {
         /* player movement direction */
-        enum { STOP, U, D, L, R } dir;
+        enum { STOP = 0, U, D, L, R } dir;
 
         struct       flist *snake;  /* list of coords of snake segments */
         struct       ftuple *apple; /* coordinates of current apple position */

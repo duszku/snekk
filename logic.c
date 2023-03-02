@@ -32,10 +32,12 @@ logic_entry_point(void *v_game)
         init_global();
         game = (struct game *)v_game;
         over = 0;
+        game->dir = R;
 
         while (!over) {
                 sleep(1);
                 move_snake(game);
+                grow_snake(game);
                 spawn_apple(game);
 
                 if (pthread_mutex_lock(&(game->mt_gover)) != 0)
@@ -122,7 +124,7 @@ tup_cmp(const void *v_a, const void *v_b)
 void
 move_snake(struct game *game)
 {
-        void *(*movs[])(void *) = { mov_u, mov_d, mov_l, mov_r };
+        void *(*movs[])(void *) = { NULL, mov_u, mov_d, mov_l, mov_r };
 
         if (game->dir == STOP)
                 return;
@@ -136,7 +138,7 @@ move_snake(struct game *game)
         flist_map(game->snake, pull_snake, 0);
 
         /* move head of the snake */
-        movs[game->dir - 1](flist_val_head(game->snake));
+        movs[game->dir](flist_val_head(game->snake));
 
         if (pthread_mutex_unlock(&(game->mt_snake)) != 0)
                 ERROR("pthread_mutex_unlock");

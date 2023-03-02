@@ -35,7 +35,7 @@ logic_entry_point(void *v_game)
 
         if (pthread_mutex_lock(&(game->mt_dir)) != 0)
                 ERROR("pthread_mutex_lock");
-        game->dir = R;
+        game->dir = STOP;
         if (pthread_mutex_unlock(&(game->mt_dir)) != 0)
                 ERROR("pthread_mutex_unlock");
 

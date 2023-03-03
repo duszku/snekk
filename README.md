@@ -22,7 +22,7 @@ and thats basically it
 
 ## controls
 
-**wasd** for movement, **x** to end the game
+**wasd** or arrow keys for movement, **x** to end the game
 
 ## PROCEED WITH CAUTION
 

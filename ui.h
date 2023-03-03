@@ -9,6 +9,7 @@
 
 #include "game.h"
 
+#include <errno.h>
 #include <curses.h>
 #include <unistd.h>
 

@@ -35,7 +35,7 @@ ui_entry_point(void *v_game)
                 pop_input(game);
                 draw_empty(game);
                 draw_map(game);
-                sleep(1);
+                nap_ms(500);
 
                 if (pthread_mutex_lock(&(game->mt_gover)) != 0)
                         ERROR("pthread_mutex_lock");
@@ -190,4 +190,22 @@ pop_input(struct game *g)
 
         if (pthread_mutex_unlock(&(g->mt_dir)) != 0)
                 ERROR("pthread_mutex_unlock");
+}
+
+void
+nap_ms(unsigned ns)
+{
+#define MSEC_IN_NSEC(X) ((X) * 1000000)
+
+        struct   timespec nap;
+        int      ret;
+
+        nap.tv_nsec = MSEC_IN_NSEC(ns);
+        nap.tv_sec  = 0;
+
+        do ret = nanosleep(&nap, &nap);
+        while (ret != 0 && errno == EINTR);
+
+        if (ret != 0)
+                ERROR("nanosleep");
 }

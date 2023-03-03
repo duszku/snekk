@@ -49,7 +49,7 @@ logic_entry_point(void *v_game)
 
         spawn_apple(game);
         while (!over) {
-                sleep(1);
+                nap_ms(500);
                 move_snake(game);
                 if (check_collisions(game))
                         break;

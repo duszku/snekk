@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
 
 #include <funcc/flist.h>
@@ -32,6 +33,7 @@
 #else
 # define ERROR(X) {;}
 #endif
+
 
 struct game {
         /* player movement direction */
@@ -50,5 +52,7 @@ struct game {
         pthread_mutex_t mt_gover;
         pthread_mutex_t mt_dir;
 };
+
+void         nap_ms(unsigned);      /* sleep for given amount of nanoseconds */
 
 #endif /* GAME_H */

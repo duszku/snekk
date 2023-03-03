@@ -59,6 +59,7 @@ curses_setup(void)
         cbreak();
         noecho();
         nodelay(stdscr, 1);
+        keypad(stdscr, 1);
         clear();
         refresh();
 }

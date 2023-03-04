@@ -12,12 +12,20 @@
         insch((C));                 \
 } while (0)
 
-static void          curses_setup(void);         /* abstracts boilerplate */
+/*
+ * terminal offsets so that map can be printed in the center, needs to be global
+ * because flist_map() takes a function that only takes one argument as an input
+ */
+int      x_off = 0;
+int      y_off = 0;
+
+static WINDOW       *curses_setup(void);         /* abstracts boilerplate */
 static void          draw_empty(struct game *);  /* draws empty map & borders */
 static void          draw_map(struct game *);    /* draws snake & apple */
 static void          pop_input(struct game *);   /* reads input queue and sets
                                                     parameters in the game
                                                     struct accordingly */
+static void          calc_offsets(WINDOW *);     /* calculates global offsets */
 
 static void         *map_helper(void *);
 
@@ -25,12 +33,14 @@ void *
 ui_entry_point(void *v_game)
 {
         struct       game *game;
+        WINDOW      *wnd;
         int          over;
 
         game = (struct game *)v_game;
         over = 0;
 
-        curses_setup();
+        wnd = curses_setup();
+        calc_offsets(wnd);
         while (!over) {
                 pop_input(game);
                 draw_empty(game);
@@ -52,16 +62,20 @@ ui_entry_point(void *v_game)
         return NULL;
 }
 
-void
+WINDOW *
 curses_setup(void)
 {
-        initscr();
+        WINDOW *ret;
+
+        ret = initscr();
         cbreak();
         noecho();
         nodelay(stdscr, 1);
         keypad(stdscr, 1);
         clear();
         refresh();
+
+        return ret;
 }
 
 void
@@ -208,4 +222,13 @@ nap_ms(unsigned ns)
 
         if (ret != 0)
                 ERROR("nanosleep");
+}
+
+void
+calc_offsets(WINDOW *wnd)
+{
+        getmaxyx(wnd, y_off, x_off);
+
+        y_off = (y_off - DEFAULT_HEIGHT) >> 1;
+        x_off = (x_off - DEFAULT_WIDTH) >> 1;
 }

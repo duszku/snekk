@@ -35,7 +35,7 @@ ui_entry_point(void *v_game)
                 pop_input(game);
                 draw_empty(game);
                 draw_map(game);
-                nap_ms(500);
+                nap_ms(400);
 
                 if (pthread_mutex_lock(&(game->mt_gover)) != 0)
                         ERROR("pthread_mutex_lock");

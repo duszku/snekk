@@ -87,22 +87,22 @@ draw_empty(struct game *g)
         refresh();
 
         /* draw vertical lines */
-        for (y = 0; y < g->g_heig; ++y) {
-                INSERT_CHAR(0, y, '|');
-                INSERT_CHAR(g->g_widt - 1, y, '|');
+        for (y = y_off; y < g->g_heig + y_off; ++y) {
+                INSERT_CHAR(x_off, y, '|');
+                INSERT_CHAR(g->g_widt - 1 + x_off, y, '|');
         }
 
         /* draw horizontal lines */
-        for (x = 0; x < g->g_widt; ++x) {
-                INSERT_CHAR(x, 0, '-');
-                INSERT_CHAR(x, g->g_heig - 1, '-');
+        for (x = x_off; x < g->g_widt + x_off; ++x) {
+                INSERT_CHAR(x, y_off, '-');
+                INSERT_CHAR(x, g->g_heig - 1 + y_off, '-');
         }
 
         /* draw corners */
-        INSERT_CHAR(0, 0, '+');
-        INSERT_CHAR(0, g->g_heig - 1, '+');
-        INSERT_CHAR(g->g_widt - 1, 0, '+');
-        INSERT_CHAR(g->g_widt - 1, g->g_heig - 1, '+');
+        INSERT_CHAR(x_off, y_off, '+');
+        INSERT_CHAR(x_off, g->g_heig - 1 + y_off, '+');
+        INSERT_CHAR(g->g_widt - 1 + x_off, y_off, '+');
+        INSERT_CHAR(g->g_widt - 1 + x_off, g->g_heig - 1 + y_off, '+');
 
         refresh();
 }
@@ -123,7 +123,7 @@ draw_map(struct game *g)
                 ERROR("pthread_mutex_unlock");
 
         if (x > 0 && y > 0)
-                INSERT_CHAR(x, y, '@');
+                INSERT_CHAR(x + x_off, y + y_off, '@');
 
         /* drawing snake */
         if (pthread_mutex_lock(&(g->mt_snake)) != 0)
@@ -138,7 +138,7 @@ draw_map(struct game *g)
                 ERROR("pthread_mutex_unlock");
 
         if (x > 0 && y > 0)
-                INSERT_CHAR(x, y, 'O');
+                INSERT_CHAR(x + x_off, y + y_off, 'O');
 
         refresh();
 }
@@ -154,7 +154,7 @@ map_helper(void *v_tup)
         x = *((int *)ftuple_fst(tup));
         y = *((int *)ftuple_snd(tup));
 
-        INSERT_CHAR(x, y, 'o');
+        INSERT_CHAR(x + x_off, y + y_off, 'o');
 
         return v_tup;
 }

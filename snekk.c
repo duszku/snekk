@@ -9,7 +9,6 @@
 #include "ui.h"
 
 void         tup_free(void *);                  /* frees a coordinate tuple */
-void         set_handler(void (*)(int), int);   /* sets signal handler */
 void         init(struct game *);               /* initializes game struct */
 void         cleanup(struct game *);            /* cleans the game struct */
 void         wait_till_over(struct game *);     /* waits for SIGINT */
@@ -55,18 +54,6 @@ tup_free(void *v_tup)
         free(tmp);
 
         ftuple_free(&tup);
-}
-
-void
-set_handler(void (*f)(int), int sig)
-{
-        struct   sigaction sa;
-
-        memset(&sa, 0x00, sizeof(struct sigaction));
-        sa.sa_handler = f;
-
-        if (sigaction(sig, &sa, NULL) == -1)
-                ERROR("sigaction");
 }
 
 void

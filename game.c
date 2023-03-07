@@ -17,3 +17,11 @@ nap_ms(unsigned ns)
         if (ret != 0)
                 ERROR("nanosleep");
 }
+
+void
+sigint_block(sigset_t *p_mask)
+{
+        sigemptyset(p_mask);
+        sigaddset(p_mask, SIGINT);
+        pthread_sigmask(SIG_BLOCK, p_mask, NULL);
+}

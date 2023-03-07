@@ -328,6 +328,8 @@ check_collisions(struct game *game)
                 spawn_apple(game);
         }
 
+        flist_free(&cpy, 0);
+
         return 0;
 }
 

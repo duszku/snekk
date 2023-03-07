@@ -11,7 +11,6 @@ this is basically just tui snake idek what more to say.
 
 even though Makefile uses gcc by default, changing it to any other compiler
 should still work, at least for the release target
-
 then you just go
 
 ```shell
@@ -22,7 +21,7 @@ and thats basically it
 
 ## controls
 
-**wasd** or arrow keys for movement, **x** to end the game
+**wasd** or arrow keys for movement, **x** to end the game, **C-c** works too
 
 ## PROCEED WITH CAUTION
 

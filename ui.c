@@ -38,6 +38,7 @@ ui_entry_point(void *v_game)
         int          over;
 
         sigint_block(&mask);
+        set_handler(SIG_IGN, SIGUSR1);
         game = (struct game *)v_game;
         over = 0;
 

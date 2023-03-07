@@ -40,6 +40,7 @@ logic_entry_point(void *v_game)
 
         init_global();
         sigint_block(&mask);
+        set_handler(SIG_IGN, SIGUSR1);
 
         game = (struct game *)v_game;
         over = 0;

@@ -14,6 +14,10 @@ void         init(struct game *);               /* initializes game struct */
 void         cleanup(struct game *);            /* cleans the game struct */
 void         wait_till_over(struct game *);     /* waits for SIGINT */
 
+volatile sig_atomic_t end = 0;
+
+void sigint_handl(int ign) { end = 1; }
+
 int
 main(void)
 {
@@ -21,6 +25,7 @@ main(void)
         pthread_t    ui_tid, lg_tid;
 
         setlocale(LC_ALL, "");
+        set_handler(sigint_handl, SIGINT);
         init(&game);
 
         if (pthread_create(&ui_tid, NULL, ui_entry_point, &game) != 0)

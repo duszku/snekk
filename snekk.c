@@ -41,8 +41,11 @@ main(void)
                 pthread_kill(ui_tid, SIGUSR1);
         }
 
-        pthread_kill(lg_tid, SIGUSR2);
-        pthread_kill(ui_tid, SIGUSR2);
+        if (pthread_mutex_lock(&(game.mt_gover)) != 0)
+                ERROR("pthread_mutex_lock");
+        game.gameover = 1;
+        if (pthread_mutex_unlock(&(game.mt_gover)) != 0)
+                ERROR("pthread_mutex_unlock");
 
         pthread_join(ui_tid, NULL);
         pthread_join(lg_tid, NULL);

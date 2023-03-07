@@ -8,7 +8,7 @@
 #include "logic.h"
 #include "ui.h"
 
-#define TEMPO_IN_MS 500
+#define TEMPO_IN_MS 300
 
 void         tup_free(void *);                  /* frees a coordinate tuple */
 void         init(struct game *);               /* initializes game struct */

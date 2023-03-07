@@ -44,7 +44,6 @@ logic_entry_point(void *v_game)
         init_global();
         sigint_block(&mask, &oldmask);
         set_handler(remember_sig, SIGUSR1);
-        set_handler(remember_sig, SIGUSR2);
 
         game = (struct game *)v_game;
         over = 0;

@@ -15,6 +15,9 @@
  */
 struct ftuple   *movement_prev;
 
+static volatile sig_atomic_t last_sig = 0;
+static void remember_sig(int sig) { last_sig = sig; }
+
 static void      move_snake(struct game *);
 static void      spawn_apple(struct game *);
 static void      grow_snake(struct game *);
@@ -35,12 +38,13 @@ void *
 logic_entry_point(void *v_game)
 {
         struct       game *game;
-        sigset_t     mask;
+        sigset_t     mask, oldmask;
         int          over;
 
         init_global();
-        sigint_block(&mask);
-        set_handler(SIG_IGN, SIGUSR1);
+        sigint_block(&mask, &oldmask);
+        set_handler(remember_sig, SIGUSR1);
+        set_handler(remember_sig, SIGUSR2);
 
         game = (struct game *)v_game;
         over = 0;
@@ -53,10 +57,11 @@ logic_entry_point(void *v_game)
 
         spawn_apple(game);
         while (!over) {
-                nap_ms(400);
                 move_snake(game);
                 if (check_collisions(game))
                         break;
+
+                sigsuspend(&oldmask);
 
                 if (pthread_mutex_lock(&(game->mt_gover)) != 0)
                         ERROR("pthread_mutex_lock");

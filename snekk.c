@@ -8,6 +8,8 @@
 #include "logic.h"
 #include "ui.h"
 
+#define TEMPO_IN_MS 500
+
 void         tup_free(void *);                  /* frees a coordinate tuple */
 void         init(struct game *);               /* initializes game struct */
 void         cleanup(struct game *);            /* cleans the game struct */
@@ -32,6 +34,15 @@ main(void)
 
         if (pthread_create(&lg_tid, NULL, logic_entry_point, &game) != 0)
                 ERROR("pthread_create");
+
+        while (!end) {
+                nap_ms(TEMPO_IN_MS);
+                pthread_kill(lg_tid, SIGUSR1);
+                pthread_kill(ui_tid, SIGUSR1);
+        }
+
+        pthread_kill(lg_tid, SIGUSR2);
+        pthread_kill(ui_tid, SIGUSR2);
 
         pthread_join(ui_tid, NULL);
         pthread_join(lg_tid, NULL);

@@ -19,6 +19,9 @@
 int      x_off = 0;
 int      y_off = 0;
 
+static volatile sig_atomic_t last_sig = 0;
+static void remember_sig(int sig) { last_sig = sig; }
+
 static WINDOW       *curses_setup(void);         /* abstracts boilerplate */
 static void          draw_empty(struct game *);  /* draws empty map & borders */
 static void          draw_map(struct game *);    /* draws snake & apple */
@@ -34,11 +37,13 @@ ui_entry_point(void *v_game)
 {
         struct       game *game;
         WINDOW      *wnd;
-        sigset_t     mask;
+        sigset_t     mask, oldmask;
         int          over;
 
-        sigint_block(&mask);
-        set_handler(SIG_IGN, SIGUSR1);
+        sigint_block(&mask, &oldmask);
+        set_handler(remember_sig, SIGUSR1);
+        set_handler(remember_sig, SIGUSR2);
+
         game = (struct game *)v_game;
         over = 0;
 
@@ -48,7 +53,8 @@ ui_entry_point(void *v_game)
                 pop_input(game);
                 draw_empty(game);
                 draw_map(game);
-                nap_ms(400);
+
+                sigsuspend(&oldmask);
 
                 if (pthread_mutex_lock(&(game->mt_gover)) != 0)
                         ERROR("pthread_mutex_lock");

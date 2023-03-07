@@ -39,6 +39,13 @@ main(void)
                 nap_ms(TEMPO_IN_MS);
                 pthread_kill(lg_tid, SIGUSR1);
                 pthread_kill(ui_tid, SIGUSR1);
+
+                if (pthread_mutex_lock(&(game.mt_gover)) != 0)
+                        ERROR("pthread_mutex_lock");
+                if (game.gameover)
+                        end = 1;
+                if (pthread_mutex_unlock(&(game.mt_gover)) != 0)
+                        ERROR("pthread_mutex_unlock");
         }
 
         if (pthread_mutex_lock(&(game.mt_gover)) != 0)

@@ -36,6 +36,8 @@
 # define ERROR(X) {;}
 #endif
 
+/* Similar in purpose to WinAPI's UNREFERENCED_PARAMETER */
+#define UNUSED(X) ((void)(X))
 
 struct game {
         /* player movement direction */

@@ -16,7 +16,7 @@ void         wait_till_over(struct game *);     /* waits for SIGINT */
 
 volatile sig_atomic_t end = 0;
 
-void sigint_handl(int ign) { end = 1; }
+void sigint_handl(int ign) { UNUSED(ign); end = 1; }
 
 int
 main(void)

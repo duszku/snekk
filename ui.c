@@ -214,6 +214,8 @@ pop_input(struct game *g)
 
         if (pthread_mutex_unlock(&(g->mt_dir)) != 0)
                 ERROR("pthread_mutex_unlock");
+
+        flushinp();
 }
 
 void

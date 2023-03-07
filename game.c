@@ -31,9 +31,9 @@ set_handler(void (*f)(int), int sig)
 }
 
 void
-sigint_block(sigset_t *p_mask)
+sigint_block(sigset_t *p_mask, sigset_t *p_oldmask)
 {
         sigemptyset(p_mask);
         sigaddset(p_mask, SIGINT);
-        pthread_sigmask(SIG_BLOCK, p_mask, NULL);
+        pthread_sigmask(SIG_BLOCK, p_mask, p_oldmask);
 }

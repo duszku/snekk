@@ -1,5 +1,5 @@
 CC=gcc
-TARGET=SANIT
+TARGET=RELES
 
 SRC=snekk.c ui.c logic.c game.c
 OBJ=${SRC:.c=.o}

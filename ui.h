@@ -9,9 +9,7 @@
 
 #include "game.h"
 
-#include <errno.h>
 #include <curses.h>
-#include <unistd.h>
 
 void        *ui_entry_point(void *);
 

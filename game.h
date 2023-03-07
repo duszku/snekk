@@ -12,6 +12,7 @@
 #define DEFAULT_WIDTH   80
 #define DEFAULT_HEIGHT  30
 
+#include <errno.h>
 #include <locale.h>
 #include <pthread.h>
 #include <signal.h>

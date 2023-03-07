@@ -34,8 +34,10 @@ ui_entry_point(void *v_game)
 {
         struct       game *game;
         WINDOW      *wnd;
+        sigset_t     mask;
         int          over;
 
+        sigint_block(&mask);
         game = (struct game *)v_game;
         over = 0;
 
@@ -58,6 +60,8 @@ ui_entry_point(void *v_game)
         }
 
         endwin();
+
+        pthread_sigmask(SIG_UNBLOCK, &mask, NULL);
 
         return NULL;
 }

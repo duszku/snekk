@@ -14,6 +14,7 @@
 
 #include <locale.h>
 #include <pthread.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -54,5 +55,6 @@ struct game {
 };
 
 void         nap_ms(unsigned);      /* sleep for given amount of nanoseconds */
+void         sigint_block(sigset_t *);
 
 #endif /* GAME_H */

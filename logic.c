@@ -35,9 +35,12 @@ void *
 logic_entry_point(void *v_game)
 {
         struct       game *game;
+        sigset_t     mask;
         int          over;
 
         init_global();
+        sigint_block(&mask);
+
         game = (struct game *)v_game;
         over = 0;
 
@@ -67,6 +70,8 @@ logic_entry_point(void *v_game)
         free(ftuple_fst(movement_prev));
         free(ftuple_snd(movement_prev));
         ftuple_free(&movement_prev);
+
+        pthread_sigmask(SIG_UNBLOCK, &mask, NULL);
 
         return NULL;
 }

@@ -15,10 +15,10 @@ volatile sig_atomic_t end = 0;
 void sigint_handl(int ign) { UNUSED(ign); end = 1; }
 
 /* Helper subroutines */
-void         tup_free(void *);                  /* frees a coordinate tuple */
 void         init(struct game *);               /* initializes game struct */
 void         funcc_init(struct game *);         /* initializes libfuncc data */
 void         cleanup(struct game *);            /* cleans the game struct */
+void         tup_free(void *);                  /* frees a coordinate tuple */
 
 /*
  * snekk is a simple cli curses snake game. It uses three threads. First comes
@@ -40,6 +40,7 @@ main(void)
         struct       game game;
         pthread_t    ui_tid, lg_tid;
 
+        /* set up environment and create remaining threads */
         setlocale(LC_ALL, "");
         set_handler(sigint_handl, SIGINT);
         init(&game);
@@ -50,6 +51,7 @@ main(void)
         if (pthread_create(&lg_tid, NULL, logic_entry_point, &game) != 0)
                 ERROR("pthread_create");
 
+        /* generate clock ticks and intercept SIGINTs */
         while (!end) {
                 nap_ms(TEMPO_IN_MS);
                 pthread_kill(lg_tid, SIGUSR1);
@@ -69,27 +71,12 @@ main(void)
         if (pthread_mutex_unlock(&(game.mt_gover)) != 0)
                 ERROR("pthread_mutex_unlock");
 
+        /* cleanup */
         pthread_join(ui_tid, NULL);
         pthread_join(lg_tid, NULL);
         cleanup(&game);
 
         return EXIT_SUCCESS;
-}
-
-void
-tup_free(void *v_tup)
-{
-        struct   ftuple *tup;
-        void    *tmp;
-
-        tup = (struct ftuple *)v_tup;
-
-        tmp = ftuple_fst(tup);
-        free(tmp);
-        tmp = ftuple_snd(tup);
-        free(tmp);
-
-        ftuple_free(&tup);
 }
 
 void
@@ -110,10 +97,13 @@ init(struct game *g)
         /* preparing mutexes */
         if (pthread_mutex_init(&(g->mt_apple), NULL) != 0)
                 ERROR("pthread_mutex_init");
+
         if (pthread_mutex_init(&(g->mt_snake), NULL) != 0)
                 ERROR("pthread_mutex_init");
+
         if (pthread_mutex_init(&(g->mt_gover), NULL) != 0)
                 ERROR("pthread_mutex_init");
+
         if (pthread_mutex_init(&(g->mt_dir), NULL) != 0)
                 ERROR("pthread_mutex_init");
 }
@@ -129,13 +119,16 @@ funcc_init(struct game *g)
         /* setting up snake */
         if (NL(pos_x = malloc(sizeof(int))))
                 ERROR("malloc");
+
         if (NL(pos_y = malloc(sizeof(int))))
                 ERROR("malloc");
+
         *pos_x = g->g_widt >> 1;
         *pos_y = g->g_heig >> 1;
 
         if (NL(sn_head = ftuple_create(2, pos_x, pos_y)))
                 ERROR("ftuple_create");
+
         if (NL(g->snake = flist_append(NULL, sn_head, FLIST_CLEANABLE)))
                 ERROR("flist_append");
 
@@ -160,10 +153,29 @@ cleanup(struct game *g)
 
         if (pthread_mutex_destroy(&(g->mt_apple)) != 0)
                 ERROR("pthread_mutex_destroy");
+
         if (pthread_mutex_destroy(&(g->mt_snake)) != 0)
                 ERROR("pthread_mutex_destroy");
+
         if (pthread_mutex_destroy(&(g->mt_gover)) != 0)
                 ERROR("pthread_mutex_destroy");
+
         if (pthread_mutex_destroy(&(g->mt_dir)) != 0)
                 ERROR("pthread_mutex_destroy");
+}
+
+void
+tup_free(void *v_tup)
+{
+        struct   ftuple *tup;
+        void    *tmp;
+
+        tup = (struct ftuple *)v_tup;
+
+        tmp = ftuple_fst(tup);
+        free(tmp);
+        tmp = ftuple_snd(tup);
+        free(tmp);
+
+        ftuple_free(&tup);
 }

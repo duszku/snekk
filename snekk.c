@@ -13,7 +13,6 @@
 void         tup_free(void *);                  /* frees a coordinate tuple */
 void         init(struct game *);               /* initializes game struct */
 void         cleanup(struct game *);            /* cleans the game struct */
-void         wait_till_over(struct game *);     /* waits for SIGINT */
 
 /* SIGINT handling */
 volatile sig_atomic_t end = 0;

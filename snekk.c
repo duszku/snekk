@@ -20,6 +20,20 @@ void         init(struct game *);               /* initializes game struct */
 void         funcc_init(struct game *);         /* initializes libfuncc data */
 void         cleanup(struct game *);            /* cleans the game struct */
 
+/*
+ * snekk is a simple cli curses snake game. It uses three threads. First comes
+ * the logic thread which is responsible for detecting collisions, giving player
+ * points, making the snake move and so on. Next we have the UI thread which
+ * controls use of curses. It prints map to the screen and collects user input.
+ *
+ * Finaly we have the main thread. It sets up and then cleans environment. It
+ * also serves the role of a clock as it generates a SIGUSR1 tick to the
+ * remaining threads every TEMPO_IN_MS miliseconds and said signal is necessary
+ * for them to do their thing. This serves as the synchronization mean but also
+ * assures stable game tempo. Last thing that the main thread does is
+ * intercepting any incoming SIGINT signals and making the program exit
+ * gracefully upon recieval of said signal.
+ */
 int
 main(void)
 {

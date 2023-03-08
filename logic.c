@@ -26,7 +26,8 @@ static int       check_collisions(struct game *);   /* check for collisions */
 
 /* helper subroutines */
 static void      init_global(void);                 /* initialize global vars */
-static int       apple_collides(struct game *, int, int);
+static int       col_appl(struct game *, int, int); /* verify apple collision */
+static int       col_self(struct game *);           /* verify autocollision */
 static int       tup_cmp(const void *, const void *); /* compare int tuples */
 static void      get_ap_coords(struct game *, int *, int *);
 
@@ -100,7 +101,7 @@ spawn_apple(struct game *game)
         do {
                 new_x = rand_r(&(game->rng_s)) % (game->g_widt - 2) + 1;
                 new_y = rand_r(&(game->rng_s)) % (game->g_heig - 2) + 1;
-        } while (apple_collides(game, new_x, new_y));
+        } while (col_appl(game, new_x, new_y));
 
         /* make change effective */
         if (pthread_mutex_lock(&(game->mt_apple)) != 0)
@@ -114,7 +115,7 @@ spawn_apple(struct game *game)
 }
 
 int
-apple_collides(struct game *game, int x, int y)
+col_appl(struct game *game, int x, int y)
 {
         struct   ftuple *tup;
         int      ret;
@@ -338,7 +339,7 @@ check_collisions(struct game *game)
         }
 
         get_ap_coords(game, &ap_x, &ap_y);
-        if (apple_collides(game, ap_x, ap_y)) {
+        if (col_appl(game, ap_x, ap_y)) {
                 game->points++;
                 grow_snake(game);
                 spawn_apple(game);

@@ -19,6 +19,7 @@ void         init(struct game *);               /* initializes game struct */
 void         funcc_init(struct game *);         /* initializes libfuncc data */
 void         cleanup(struct game *);            /* cleans the game struct */
 void         tup_free(void *);                  /* frees a coordinate tuple */
+void         nap_ms(unsigned);                  /* sleep for miliseconds */
 
 /*
  * snekk is a simple cli curses snake game. It uses three threads. First comes
@@ -178,4 +179,22 @@ tup_free(void *v_tup)
         free(tmp);
 
         ftuple_free(&tup);
+}
+
+void
+nap_ms(unsigned ms)
+{
+#define MSEC_IN_NSEC(X) ((X) * 1000000)
+
+        struct   timespec nap;
+        int      ret;
+
+        nap.tv_nsec = MSEC_IN_NSEC(ms);
+        nap.tv_sec  = 0;
+
+        do ret = nanosleep(&nap, &nap);
+        while (ret != 0 && errno == EINTR);
+
+        if (ret != 0)
+                ERROR("nanosleep");
 }

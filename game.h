@@ -57,7 +57,6 @@ struct game {
         pthread_mutex_t mt_dir;
 };
 
-void         nap_ms(unsigned);                  /* sleep for miliseconds */
 void         set_handler(void (*)(int), int);   /* sets signal handler */
 void         sigint_block(sigset_t *, sigset_t *);
 

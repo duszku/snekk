@@ -8,6 +8,9 @@
 
 #define DEREF_INT_OF(X) (*((int *)(X)))
 
+static volatile sig_atomic_t last_sig = 0;
+static void remember_sig(int sig) { last_sig = sig; }
+
 /*
  * previous snake segment, used for movement in pull_snake(). it is stored as
  * global state because flist_map() exposes list for mapping only with
@@ -15,25 +18,30 @@
  */
 struct ftuple   *movement_prev;
 
-static volatile sig_atomic_t last_sig = 0;
-static void remember_sig(int sig) { last_sig = sig; }
-
-static void      move_snake(struct game *);
+static void      move_snake(struct game *);         /* snake movement wrapper */
+static void     *pull_snake(void *);                /* move snake tail */
 static void      spawn_apple(struct game *);
-static void      grow_snake(struct game *);
-static int       check_collisions(struct game *);
+static void      grow_snake(struct game *);         /* add new snake segment */
+static int       check_collisions(struct game *);   /* check for collisions */
 
 /* helper subroutines */
-static void      init_global(void);
+static void      init_global(void);                 /* initialize global vars */
 static int       apple_collides(struct game *, int, int);
-static int       tup_cmp(const void *, const void *);
-static void     *pull_snake(void *);
+static int       tup_cmp(const void *, const void *); /* compare int tuples */
+static void      get_ap_coords(struct game *, int *, int *);
+
+/* snake head movers */
 static void     *mov_u(void *);
 static void     *mov_d(void *);
 static void     *mov_l(void *);
 static void     *mov_r(void *);
-static void      get_ap_coords(struct game *, int *, int *);
 
+/*
+ * Entry point for the logic thread. It is responsible for initializing thread
+ * environment as well as hosting thread's main loop which in turn moves snake,
+ * spawns apples and detects collisions. Once game is over it also frees all
+ * allocated resources.
+ */
 void *
 logic_entry_point(void *v_game)
 {
@@ -41,10 +49,10 @@ logic_entry_point(void *v_game)
         sigset_t     mask, oldmask;
         int          over;
 
+        /* prepare environment */
         init_global();
         sigint_block(&mask, &oldmask);
         set_handler(remember_sig, SIGUSR1);
-
         game = (struct game *)v_game;
         over = 0;
 
@@ -54,13 +62,14 @@ logic_entry_point(void *v_game)
         if (pthread_mutex_unlock(&(game->mt_dir)) != 0)
                 ERROR("pthread_mutex_unlock");
 
+        /* this thread's main loop */
         spawn_apple(game);
         while (!over) {
                 move_snake(game);
                 if (check_collisions(game))
                         break;
 
-                sigsuspend(&oldmask);
+                sigsuspend(&oldmask);   /* wait for clock tick */
 
                 if (pthread_mutex_lock(&(game->mt_gover)) != 0)
                         ERROR("pthread_mutex_lock");
@@ -72,6 +81,7 @@ logic_entry_point(void *v_game)
                         ERROR("pthread_mutex_unlock");
         }
 
+        /* cleanup and unvlock blocked signals */
         free(ftuple_fst(movement_prev));
         free(ftuple_snd(movement_prev));
         ftuple_free(&movement_prev);
@@ -86,11 +96,13 @@ spawn_apple(struct game *game)
 {
         int      new_x, new_y;
 
+        /* find suitable coordinates */
         do {
                 new_x = rand_r(&(game->rng_s)) % (game->g_widt - 2) + 1;
                 new_y = rand_r(&(game->rng_s)) % (game->g_heig - 2) + 1;
         } while (apple_collides(game, new_x, new_y));
 
+        /* make change effective */
         if (pthread_mutex_lock(&(game->mt_apple)) != 0)
                 ERROR("pthread_mutex_lock");
 
@@ -113,6 +125,7 @@ apple_collides(struct game *game, int x, int y)
         if (pthread_mutex_lock(&(game->mt_snake)) != 0)
                 ERROR("pthread_mutex_lock");
 
+        /* check if apple coords are an element of any snake segment */
         ret = flist_elem(game->snake, tup_cmp, tup);
 
         if (pthread_mutex_unlock(&(game->mt_snake)) != 0)
@@ -138,6 +151,7 @@ tup_cmp(const void *v_a, const void *v_b)
         b_x = DEREF_INT_OF(ftuple_fst(b));
         b_y = DEREF_INT_OF(ftuple_snd(b));
 
+        /* coordinate-wise equivalence comparison */
         return a_x == b_x && a_y == b_y ? 0 : 1;
 }
 
@@ -232,6 +246,8 @@ grow_snake(struct game *game)
         *y  = DEREF_INT_OF(ftuple_snd(flist_val_head(game->snake)));
         new = ftuple_create(2, x, y);
 
+        /* put new segment at the beginning, it will slowly move to the end and
+         * i think it looks cool */
         game->snake = flist_prepend(game->snake, new, FLIST_CLEANABLE);
 
         if (pthread_mutex_unlock(&(game->mt_snake)) != 0)

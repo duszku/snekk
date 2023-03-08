@@ -302,9 +302,49 @@ mov_r(void *v_tup)
 int
 check_collisions(struct game *game)
 {
-        struct   flist *cpy;
         int      ap_x, ap_y, over;
-        unsigned x, y;
+
+        over = col_self(game);
+
+        if (over) {
+
+                if (pthread_mutex_lock(&(game->mt_gover)) != 0)
+                        ERROR("pthread_mutex_lock");
+                game->gameover = 1;
+                if (pthread_mutex_unlock(&(game->mt_gover)) != 0)
+                        ERROR("pthread_mutex_unlock");
+
+                return 1;
+        }
+
+        get_ap_coords(game, &ap_x, &ap_y);
+        if (col_appl(game, ap_x, ap_y)) {
+                game->points++;
+                grow_snake(game);
+                spawn_apple(game);
+        }
+
+        return 0;
+}
+
+void
+get_ap_coords(struct game *game, int *xp, int *yp)
+{
+        if (pthread_mutex_lock(&(game->mt_apple)) != 0)
+                ERROR("pthread_mutex_lock");
+
+        *xp = DEREF_INT_OF(ftuple_fst(game->apple));
+        *yp = DEREF_INT_OF(ftuple_snd(game->apple));
+
+        if (pthread_mutex_unlock(&(game->mt_apple)) != 0)
+                ERROR("pthread_mutex_unlock");
+}
+
+int
+col_self(struct game *game)
+{
+        struct   flist *cpy;
+        int      x, y, over;
 
         over = 0;
 
@@ -326,39 +366,7 @@ check_collisions(struct game *game)
         if (x <= 0 || x >= game->g_widt - 1|| y <= 0 || y >= game->g_heig - 1)
                 over = 1;
 
-        if (over) {
-                flist_free(&cpy, 0);
-
-                if (pthread_mutex_lock(&(game->mt_gover)) != 0)
-                        ERROR("pthread_mutex_lock");
-                game->gameover = 1;
-                if (pthread_mutex_unlock(&(game->mt_gover)) != 0)
-                        ERROR("pthread_mutex_unlock");
-
-                return 1;
-        }
-
-        get_ap_coords(game, &ap_x, &ap_y);
-        if (col_appl(game, ap_x, ap_y)) {
-                game->points++;
-                grow_snake(game);
-                spawn_apple(game);
-        }
-
         flist_free(&cpy, 0);
 
-        return 0;
-}
-
-void
-get_ap_coords(struct game *game, int *xp, int *yp)
-{
-        if (pthread_mutex_lock(&(game->mt_apple)) != 0)
-                ERROR("pthread_mutex_lock");
-
-        *xp = DEREF_INT_OF(ftuple_fst(game->apple));
-        *yp = DEREF_INT_OF(ftuple_snd(game->apple));
-
-        if (pthread_mutex_unlock(&(game->mt_apple)) != 0)
-                ERROR("pthread_mutex_unlock");
+        return over;
 }

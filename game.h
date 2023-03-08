@@ -57,7 +57,7 @@ struct game {
         pthread_mutex_t mt_dir;
 };
 
-void         set_handler(void (*)(int), int);   /* sets signal handler */
-void         sigint_block(sigset_t *, sigset_t *);
+void         set_handler(void (*)(int), int);       /* sets signal handler */
+void         sigint_block(sigset_t *, sigset_t *);  /* block a sigset */
 
 #endif /* GAME_H */

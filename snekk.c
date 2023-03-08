@@ -12,6 +12,7 @@
 
 void         tup_free(void *);                  /* frees a coordinate tuple */
 void         init(struct game *);               /* initializes game struct */
+void         funcc_init(struct game *);         /* initializes libfuncc data */
 void         cleanup(struct game *);            /* cleans the game struct */
 
 /* SIGINT handling */
@@ -79,11 +80,6 @@ tup_free(void *v_tup)
 void
 init(struct game *g)
 {
-#define NL(X) ((X) == NULL)
-
-        struct   ftuple *sn_head;
-        int     *pos_x, *pos_y, *ap_x, *ap_y;
-
         srand(time(NULL));
 
         /* basic game data */
@@ -92,6 +88,28 @@ init(struct game *g)
         g->rng_s    = rand();
         g->points   = 0;
         g->gameover = 0;
+
+        /* initialize snake and apple */
+        funcc_init(g);
+
+        /* preparing mutexes */
+        if (pthread_mutex_init(&(g->mt_apple), NULL) != 0)
+                ERROR("pthread_mutex_init");
+        if (pthread_mutex_init(&(g->mt_snake), NULL) != 0)
+                ERROR("pthread_mutex_init");
+        if (pthread_mutex_init(&(g->mt_gover), NULL) != 0)
+                ERROR("pthread_mutex_init");
+        if (pthread_mutex_init(&(g->mt_dir), NULL) != 0)
+                ERROR("pthread_mutex_init");
+}
+
+void
+funcc_init(struct game *g)
+{
+#define NL(X) ((X) == NULL)
+
+        struct   ftuple *sn_head;
+        int     *pos_x, *pos_y, *ap_x, *ap_y;
 
         /* setting up snake */
         if (NL(pos_x = malloc(sizeof(int))))
@@ -117,16 +135,6 @@ init(struct game *g)
 
         if (NL(g->apple = ftuple_create(2, ap_x, ap_y)))
                 ERROR("ftuple_create");
-
-        /* preparing mutexes */
-        if (pthread_mutex_init(&(g->mt_apple), NULL) != 0)
-                ERROR("pthread_mutex_init");
-        if (pthread_mutex_init(&(g->mt_snake), NULL) != 0)
-                ERROR("pthread_mutex_init");
-        if (pthread_mutex_init(&(g->mt_gover), NULL) != 0)
-                ERROR("pthread_mutex_init");
-        if (pthread_mutex_init(&(g->mt_dir), NULL) != 0)
-                ERROR("pthread_mutex_init");
 }
 
 void

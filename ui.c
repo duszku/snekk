@@ -79,22 +79,6 @@ ui_entry_point(void *v_game)
         return NULL;
 }
 
-WINDOW *
-curses_setup(void)
-{
-        WINDOW *ret;
-
-        ret = initscr();        /* needs to be called to preoceed */
-        cbreak();               /* disable line buffering */
-        noecho();               /* do not echo user input */
-        nodelay(stdscr, 1);     /* make getch() non-blocking */
-        keypad(stdscr, 1);      /* capture arrow keys as well */
-        clear();                /* clear screen data */
-        refresh();              /* make changes effective */
-
-        return ret;
-}
-
 void
 draw_empty(struct game *g)
 {
@@ -160,22 +144,6 @@ draw_map(struct game *g)
         refresh();
 }
 
-void *
-map_helper(void *v_tup)
-{
-        struct   ftuple *tup;
-        int      x, y;
-
-        tup = (struct ftuple *)v_tup;
-
-        x = *((int *)ftuple_fst(tup));
-        y = *((int *)ftuple_snd(tup));
-
-        INSERT_CHAR(x + x_off, y + y_off, 'o');
-
-        return v_tup;
-}
-
 void
 pop_input(struct game *g)
 {
@@ -226,6 +194,22 @@ pop_input(struct game *g)
         flushinp();
 }
 
+WINDOW *
+curses_setup(void)
+{
+        WINDOW *ret;
+
+        ret = initscr();        /* needs to be called to preoceed */
+        cbreak();               /* disable line buffering */
+        noecho();               /* do not echo user input */
+        nodelay(stdscr, 1);     /* make getch() non-blocking */
+        keypad(stdscr, 1);      /* capture arrow keys as well */
+        clear();                /* clear screen data */
+        refresh();              /* make changes effective */
+
+        return ret;
+}
+
 void
 calc_offsets(WINDOW *wnd)
 {
@@ -233,4 +217,20 @@ calc_offsets(WINDOW *wnd)
 
         y_off = (y_off - DEFAULT_HEIGHT) >> 1;
         x_off = (x_off - DEFAULT_WIDTH)  >> 1;
+}
+
+void *
+map_helper(void *v_tup)
+{
+        struct   ftuple *tup;
+        int      x, y;
+
+        tup = (struct ftuple *)v_tup;
+
+        x = *((int *)ftuple_fst(tup));
+        y = *((int *)ftuple_snd(tup));
+
+        INSERT_CHAR(x + x_off, y + y_off, 'o');
+
+        return v_tup;
 }

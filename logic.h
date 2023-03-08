@@ -15,7 +15,7 @@
  * within `logic.c` to increase modularity of the code and make any future
  * refactorings simpler.
  *
- * As name suggests, following subroutine is expected to be used as the UI
+ * As name suggests, following subroutine is expected to be used as the logic
  * thread's entry point.
  */
 void        *logic_entry_point(void *);

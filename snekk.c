@@ -10,14 +10,15 @@
 
 #define TEMPO_IN_MS 300
 
+/* SIGINT handling */
+volatile sig_atomic_t end = 0;
+void sigint_handl(int ign) { UNUSED(ign); end = 1; }
+
+/* Helper subroutines */
 void         tup_free(void *);                  /* frees a coordinate tuple */
 void         init(struct game *);               /* initializes game struct */
 void         funcc_init(struct game *);         /* initializes libfuncc data */
 void         cleanup(struct game *);            /* cleans the game struct */
-
-/* SIGINT handling */
-volatile sig_atomic_t end = 0;
-void sigint_handl(int ign) { UNUSED(ign); end = 1; }
 
 int
 main(void)

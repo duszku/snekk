@@ -6,54 +6,61 @@
 
 #include "ui.h"
 
+/* input character C to the terminal window at position determined by X and Y */
 #define INSERT_CHAR(X, Y, C) do {   \
         move((Y), (X));             \
         delch();                    \
         insch((C));                 \
 } while (0)
 
+/* signal handling */
+static volatile sig_atomic_t last_sig = 0;
+static void remember_sig(int sig) { last_sig = sig; }
+
 /*
- * terminal offsets so that map can be printed in the center, needs to be global
- * because flist_map() takes a function that only takes one argument as an input
+ * terminal offsets so that map can be printed in the center. needs to be global
+ * because flist_map() takes a one-argument function
  */
 int      x_off = 0;
 int      y_off = 0;
 
-static volatile sig_atomic_t last_sig = 0;
-static void remember_sig(int sig) { last_sig = sig; }
-
-static WINDOW       *curses_setup(void);         /* abstracts boilerplate */
 static void          draw_empty(struct game *);  /* draws empty map & borders */
 static void          draw_map(struct game *);    /* draws snake & apple */
-static void          pop_input(struct game *);   /* reads input queue and sets
-                                                    parameters in the game
-                                                    struct accordingly */
+static void          pop_input(struct game *);   /* reads & interprets input */
+
+/* Helper subroutines */
+static WINDOW       *curses_setup(void);         /* abstracts boilerplate */
 static void          calc_offsets(WINDOW *);     /* calculates global offsets */
+static void         *map_helper(void *);         /* prints snake segment */
 
-static void         *map_helper(void *);
-
+/*
+ * Entry point for the UI thread. It is responsible for organizing all of its
+ * actions: it initializes and then cleans up curses setup, it contains UI
+ * thread loop and blocks and waits for certain signals.
+ */
 void *
 ui_entry_point(void *v_game)
 {
+        sigset_t     mask, oldmask;
         struct       game *game;
         WINDOW      *wnd;
-        sigset_t     mask, oldmask;
         int          over;
 
+        /* prepare thread environment */
         sigint_block(&mask, &oldmask);
         set_handler(remember_sig, SIGUSR1);
-
+        wnd  = curses_setup();
         game = (struct game *)v_game;
         over = 0;
 
-        wnd = curses_setup();
+        /* this thread's main loop */
         calc_offsets(wnd);
         while (!over) {
                 pop_input(game);
                 draw_empty(game);
                 draw_map(game);
 
-                sigsuspend(&oldmask);
+                sigsuspend(&oldmask);   /* wait for clock tick */
 
                 if (pthread_mutex_lock(&(game->mt_gover)) != 0)
                         ERROR("pthread_mutex_lock");
@@ -65,8 +72,8 @@ ui_entry_point(void *v_game)
                         ERROR("pthread_mutex_unlock");
         }
 
+        /* cleanup and unblock blocked signals */
         endwin();
-
         pthread_sigmask(SIG_UNBLOCK, &mask, NULL);
 
         return NULL;
@@ -77,13 +84,13 @@ curses_setup(void)
 {
         WINDOW *ret;
 
-        ret = initscr();
-        cbreak();
-        noecho();
-        nodelay(stdscr, 1);
-        keypad(stdscr, 1);
-        clear();
-        refresh();
+        ret = initscr();        /* needs to be called to preoceed */
+        cbreak();               /* disable line buffering */
+        noecho();               /* do not echo user input */
+        nodelay(stdscr, 1);     /* make getch() non-blocking */
+        keypad(stdscr, 1);      /* capture arrow keys as well */
+        clear();                /* clear screen data */
+        refresh();              /* make changes effective */
 
         return ret;
 }
@@ -215,6 +222,7 @@ pop_input(struct game *g)
         if (pthread_mutex_unlock(&(g->mt_dir)) != 0)
                 ERROR("pthread_mutex_unlock");
 
+        /* ignore any accidental key presses */
         flushinp();
 }
 
@@ -224,5 +232,5 @@ calc_offsets(WINDOW *wnd)
         getmaxyx(wnd, y_off, x_off);
 
         y_off = (y_off - DEFAULT_HEIGHT) >> 1;
-        x_off = (x_off - DEFAULT_WIDTH) >> 1;
+        x_off = (x_off - DEFAULT_WIDTH)  >> 1;
 }
